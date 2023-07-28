@@ -48,8 +48,7 @@ export const fuzzySort: SortingFn<Person> = (rowA, rowB, columnId) => {
 
 export const strictListFilter : FilterFn<Person> = (row,
   columnId,
-  value,
-  addMeta)=>{
+  value)=>{
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   return (value as string[]).includes(row.getValue(columnId))
 }

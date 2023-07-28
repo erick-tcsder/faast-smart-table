@@ -66,7 +66,6 @@ const TextInput: React.FC<TextInputProps> = ({
   setFilterValue,
   sortedUniqueValues,
 }) => {
-  const dataListId = columnId + 'list'
   const [constraint,setConstraint] = useState('')
 
   return (

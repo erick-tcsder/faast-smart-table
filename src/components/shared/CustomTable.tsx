@@ -139,7 +139,7 @@ export const CustomTable = React.forwardRef<HTMLTableElement,any>((props,ref)=>{
         <thead>
           {headerGroups.map(headerGroup => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map(header => !header.column.columnDef?.meta?.['hideInExport'] ? (
+              {headerGroup.headers.map(header => !((header.column.columnDef?.meta as {hideInExport?:boolean})?.hideInExport) ? (
                 <DnDColumnHeader header={header} table={table}/>
               ) : null)}
             </tr>
@@ -149,7 +149,7 @@ export const CustomTable = React.forwardRef<HTMLTableElement,any>((props,ref)=>{
           {table.getPrePaginationRowModel().rows.map((row: Row<unknown>) => (
             <>
                 <tr key={row.id}>
-                {getRowGroup(row, tableGroup).map(cell => !cell.column.columnDef?.meta?.['hideInExport'] ? (
+                {getRowGroup(row, tableGroup).map(cell => !((cell.column.columnDef?.meta as {hideInExport?:boolean})?.hideInExport) ? (
                     <td
                       {...{
                         key: cell.id,
