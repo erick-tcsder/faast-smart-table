@@ -1,0 +1,11 @@
+.menu-item-hover-secondary:hover{
+    background-color: var(--bs-light);
+}
+.menu-item-hover-secondary{
+    cursor: pointer;
+}
+.menu-item-hover-secondary.active{
+    background-color: var(--bs-primary);
+    color: white;
+    font-weight: 700;
+}
