@@ -60,7 +60,6 @@ type TextInputProps = {
 }
 
 const TextInput: React.FC<TextInputProps> = ({
-  columnId,
   columnFilterValue,
   columnSize,
   setFilterValue,
