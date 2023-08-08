@@ -47,12 +47,12 @@ export const DnDGroupingContainer = <T extends RowData>({groupedColumns,setGroup
       }
     }),[groupedColumns])
     return (
-      <div ref={dropcreate}>
-        <div ref={drop} className="d-flex gap-2 px-5 py-3" style={{
+      <div ref={dropcreate} className="py-2 px-3 rounded">
+        <div ref={drop} className="d-flex gap-2 p-2" style={{
           borderRadius: '5px',
           border: '1px dashed #ccc'
         }}>
-          {groupedColumns.map((card) => (
+          {groupedColumns.length ? (groupedColumns.map((card) => (
             <Card
               key={card}
               id={`${card}`}
@@ -61,7 +61,7 @@ export const DnDGroupingContainer = <T extends RowData>({groupedColumns,setGroup
               findCard={findCard}
               removeCard={removeCard}
             />
-          ))}
+          ))) : <span>Arrastre las Columnas Para Agrupar</span>}
         </div>
       </div>
     )
@@ -108,7 +108,6 @@ const Card = <T extends RowData>({ id, text, moveCard, findCard, removeCard } : 
   return (
       <div ref={(node) => drag(drop(node))} className="d-flex" style={{
         padding: '0.5rem 1rem',
-        marginBottom: '.5rem',
         backgroundColor: "#d7e5fc",
         borderRadius: '5px',
         cursor: 'move',

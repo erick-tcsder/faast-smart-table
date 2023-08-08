@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/restrict-plus-operands */
 import React, { useEffect, useRef, useState } from "react";
 import {
   flexRender,
@@ -10,11 +13,12 @@ import {
 import { DnDColumnHeader } from "../shared/DnDColumnHeader";
 import { DnDGroupingContainer } from "../shared/DnDGroupingContainer";
 import { Dropdown, Modal } from "react-bootstrap";
-import { DownloadTableExcel } from "react-export-table-to-excel";
+import { useDownloadExcel } from "react-export-table-to-excel";
 import DebouncedInput from "../shared/DebouncedInput";
 import ActionButtons from "../shared/ActionButtons";
+import dayjs from "dayjs";
 
-type TableGroup = "center" | "left" | "right";
+type TableGroup = string;
 
 function getTableHeaderGroups<T extends RowData>(
   table: Table<T>,
@@ -44,11 +48,16 @@ function getRowGroup<T extends RowData>(row: Row<T>, tg?: TableGroup) {
 
 interface Props<T extends RowData> {
   table: Table<T>;
-  tableGroup?: TableGroup;
-  customRender: (row: Row<T>) => React.ReactElement;
+  exportedFileName?: string; 
   title: string | React.ReactElement
-  allowGlobalFilter: boolean;
+  customRender?: (row: Row<T>) => React.ReactElement;
+  grouping: GroupingState;
+  setGrouping: (v: GroupingState) => void;
+  globalFilter: string;
+  setGlobalFilter: (value:string)=>void
+  allowNativeExcelDownload: boolean;
   allowColumnSubcomponents: boolean;
+  allowGlobalFilter: boolean;
   allowResizeCols: boolean;
   allowReorderCols: boolean;
   allowColumnFilter: boolean;
@@ -56,17 +65,12 @@ interface Props<T extends RowData> {
   allowColumnSorting: boolean;
   allowColumnGrouping: boolean;
   allowHandleVisibility: boolean;
-  allowNativeExcelDownload: boolean;
-  grouping: GroupingState;
-  setGrouping: (v: GroupingState) => void;
-  globalFilter: string;
-  setGlobalFilter: (value:string)=>void
 }
 
-export const FaastSmartTable = React.forwardRef<HTMLTableElement, any>(
-  (props, ref) => {
+export const FaastSmartTable = <T extends RowData>(props: Props<T>) => {
     const {
       table,
+      exportedFileName,
       title,
       customRender,
       grouping,
@@ -77,74 +81,73 @@ export const FaastSmartTable = React.forwardRef<HTMLTableElement, any>(
       allowNativeExcelDownload,
       allowGlobalFilter,
       ...restProps
-    } = props as Props<RowData>;
-    const refDownload = useRef<HTMLTableElement|null>()
+    } = props;
+    const refDownload = useRef<HTMLTableElement|null>(null)
     const [isGrouping, setIsGrouping] = useState(Boolean(table.getState()?.grouping?.length))
     const [showVisibility, setShowVisibility] = useState(false)
-
+    const {
+      onDownload
+    } = useDownloadExcel({
+      currentTableRef: refDownload.current,
+      filename: (exportedFileName ?? (typeof title === 'string' ? title : "Tabla")) + "_" + dayjs().format("YYYY_MM_DDTHH:mm:ss"),
+    })
     useEffect(()=>{
       setIsGrouping(Boolean(table.getState()?.grouping?.length))
     },[table])
     return (
-      <>
-      <div className="d-flex justify-content-between">
-        {title}
+      <div className="w-100">
+      <div className="d-flex justify-content-between px-2">
+        <span className="h3 align-self-center mb-0">
+          {title}
+        </span>
         <div className="d-flex">
           {allowGlobalFilter && (
             <div className="p-2">
               <DebouncedInput
                 value={globalFilter ?? ''}
                 onChange={value => setGlobalFilter(String(value))}
-                className="mx-1 p-2 font-lg shadow border border-block"
+                className="mx-1 p-2 font-lg border border-block rounded"
                 placeholder="Buscar ..."
               />
             </div>
           )}
           {allowNativeExcelDownload && (
-            <Dropdown>
+            <Dropdown className="align-self-center">
               <Dropdown.Toggle
                 variant="primary"
                 id="dropdown-basic"
-                className="btn-sm"
+                className="btn align-self-center my-auto h-100 py-2"
               >Descargar</Dropdown.Toggle>
               <Dropdown.Menu>
-                {allowNativeExcelDownload && (
-                  <DownloadTableExcel
-                    filename="table"
-                    sheet="persons"
-                    currentTableRef={refDownload}
-                  >
-                    <li role="button" className='dropdown-item' style={{cursor: 'pointer'}}> Export excel </li>
-                  </DownloadTableExcel>
-                )}
+                <button role="button" onClick={()=>onDownload()} className='dropdown-item' style={{cursor: 'pointer'}}> Export excel </button>
               </Dropdown.Menu>
             </Dropdown>
           )}
 
-          <Dropdown>
+          <Dropdown className="align-self-center ms-2">
             <Dropdown.Toggle
               variant="secondary"
               id="dropdown-basic"
-              className="btn-sm"
+              className="btn align-self-center my-auto h-100 py-2"
             >Opciones</Dropdown.Toggle>
             <Dropdown.Menu>
               {restProps.allowColumnGrouping && (
-                <li onClick={()=>{isGrouping ? table.setState((old)=>{
+                <Dropdown.Item style={{cursor: 'pointer'}} onClick={isGrouping ? ()=>{table.setState((old)=>{
                   return {
                     ...old,
                     grouping: []
                   }
-                }) : setIsGrouping(true)}} className="dropdown-item">{isGrouping ? `Desagrupar` : `Agrupar`}</li>
+                }); setIsGrouping(false)} : ()=>setIsGrouping(true)}>{isGrouping ? `Desagrupar` : `Agrupar`}</Dropdown.Item>
               )}
               {
 
               }
-              <li onClick={()=>{setShowVisibility(true)}}>Visibilidad de Columnas</li>
+              <Dropdown.Item onClick={()=>{setShowVisibility(true)}}>Visibilidad de Columnas</Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
         </div>
       </div>
-      {restProps.allowColumnGrouping && (<div>
+      {restProps.allowColumnGrouping && isGrouping && (<div>
         <DnDGroupingContainer
           columns={table.getAllLeafColumns()}
           groupedColumns={grouping}
@@ -161,7 +164,7 @@ export const FaastSmartTable = React.forwardRef<HTMLTableElement, any>(
             right: hg === 'right' ? 0 : undefined,
           }}>
             <thead>
-              {getTableHeaderGroups(table,hg as TableGroup)[0].map((headerGroup) => (
+              {getTableHeaderGroups(table,hg)[0].map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <DnDColumnHeader header={header} table={table} {...restProps}/>
@@ -170,10 +173,10 @@ export const FaastSmartTable = React.forwardRef<HTMLTableElement, any>(
               ))}
             </thead>
             <tbody>
-              {table.getRowModel().rows.map((row: Row<unknown>) => (
+              {table.getRowModel().rows.map((row: Row<T>) => (
                 <>
                   <tr key={row.id}>
-                    {getRowGroup(row, undefined).map((cell) => {
+                    {getRowGroup(row, hg).map((cell) => {
                       return (
                         <td
                           {...{
@@ -237,7 +240,7 @@ export const FaastSmartTable = React.forwardRef<HTMLTableElement, any>(
                   {allowColumnSubcomponents && row.getIsExpanded() && !row.getIsGrouped() && (
                     <tr>
                       <td colSpan={row.getVisibleCells().length}>
-                        {customRender(row)}
+                        {customRender?.(row)}
                       </td>
                     </tr>
                   )}
@@ -262,16 +265,16 @@ export const FaastSmartTable = React.forwardRef<HTMLTableElement, any>(
           totalRows={table.getPrePaginationRowModel().rows.length}
         />
       </div>
-      <Modal show={showVisibility} onBackdropClick={()=>setShowVisibility(false)} size="sm" centered>
+      <Modal show={showVisibility} onHide={()=>setShowVisibility(false)} onBackdropClick={()=>setShowVisibility(false)} size="sm" centered>
         <Modal.Body title="Visibilidad">
           <div className="p-2 inline-block">
-            <div className="px-1 border-b border-black">
-              <label>
+            <div className="px-1 border p-2 border-b border-black">
+              <label className="">
                 <input
                   type="checkbox"
                   checked={table.getIsAllColumnsVisible()}
                   onChange={table.getToggleAllColumnsVisibilityHandler()}
-                  className="mr-1"
+                  className="me-2"
                 />
                 Mostrar/Ocultar Todas
               </label>
@@ -284,7 +287,7 @@ export const FaastSmartTable = React.forwardRef<HTMLTableElement, any>(
                       type="checkbox"
                       checked={column.getIsVisible()}
                       onChange={column.getToggleVisibilityHandler()}
-                      className="mr-1"
+                      className="me-2"
                     />
                     {column.id}
                   </label>
@@ -292,9 +295,8 @@ export const FaastSmartTable = React.forwardRef<HTMLTableElement, any>(
               )
             })}
           </div>
-          <div className="d-flex">
-            <button className="btn btn-muted w-auto">Cancelar</button>
-            <button className="btn btn-brand w-auto">Aceptar</button>
+          <div className="d-flex gap-2">
+            <button onClick={()=>{setShowVisibility(false)}} className="btn btn-primary w-100">Aceptar</button>
           </div>
         </Modal.Body>
       </Modal>
@@ -313,14 +315,7 @@ export const FaastSmartTable = React.forwardRef<HTMLTableElement, any>(
       Even if it looks the same as above this component works as a blueprint for excel axport 
       ... only remove it if you are removing excel export
       */}
-      <table className="d-none" ref={r=>{
-          refDownload.current = r
-          if (typeof ref === 'function') {
-            ref(r);
-          } else if (ref) {
-            ref.current = r;
-          }
-        }}>
+      <table className="d-none" ref={refDownload}>
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
@@ -339,7 +334,7 @@ export const FaastSmartTable = React.forwardRef<HTMLTableElement, any>(
             ))}
           </thead>
           <tbody>
-            {table.getPrePaginationRowModel().rows.map((row: Row<unknown>) => (
+            {table.getPrePaginationRowModel().rows.map((row: Row<T>) => (
               <>
                 <tr key={row.id}>
                   {getRowGroup(row, undefined).map((cell) =>
@@ -407,7 +402,6 @@ export const FaastSmartTable = React.forwardRef<HTMLTableElement, any>(
             ))}
           </tbody>
         </table>
-      </>
+      </div>
     );
   }
-);

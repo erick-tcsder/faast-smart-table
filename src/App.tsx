@@ -1,6 +1,10 @@
 import {
   ColumnOrderState,
 } from '@tanstack/react-table'
+import { FaastSmartTable, useTable } from './components/FaastSmartTable'
+import { columns } from './tableModels'
+import { makeData } from './makeData'
+import { useState } from 'react'
 
 export const reorderColumn = (
   draggedColumnId: string,
@@ -16,9 +20,31 @@ export const reorderColumn = (
 }
 
 export const App = () => {
+  const [data,setData] = useState(makeData(1000))
+  const {
+    ...pr
+  } = useTable({
+    defaultColumns: columns,
+    data: data
+  })
   return (
     <>
-
+      <FaastSmartTable table={pr.table}
+      title={"TEST TABLE"}
+      allowGlobalFilter
+      allowColumnSubcomponents
+      allowResizeCols
+      allowReorderCols
+      allowColumnFilter
+      allowColumnPinning
+      allowColumnSorting
+      allowColumnGrouping
+      allowHandleVisibility
+      allowNativeExcelDownload
+      grouping={pr.grouping}
+      setGrouping={pr.setGrouping}
+      globalFilter={pr.globalFilter}
+      setGlobalFilter={pr.setGlobalFilter}/>
     </>
   )
 }
