@@ -43,7 +43,7 @@ function getRowGroup<T extends RowData>(row: Row<T>, tg?: TableGroup) {
 interface Props<T extends RowData>{
   table: Table<T>
   tableGroup?: TableGroup,
-  customRender: (props: { row: Row<T> }) => React.ReactElement
+  customRender: (row: Row<T>) => React.ReactElement
 }
 
 export const CustomTable = React.forwardRef<HTMLTableElement,any>((props,ref)=>{
@@ -124,10 +124,10 @@ export const CustomTable = React.forwardRef<HTMLTableElement,any>((props,ref)=>{
                   )
                 })}
               </tr>
-              {row.getIsExpanded() && (
+              {row.getIsExpanded() && !row.getIsGrouped() && (
                 <tr>
                   <td colSpan={row.getVisibleCells().length}>
-                    {customRender({ row })}
+                    {customRender(row)}
                   </td>
                 </tr>
               )}
@@ -140,7 +140,7 @@ export const CustomTable = React.forwardRef<HTMLTableElement,any>((props,ref)=>{
           {headerGroups.map(headerGroup => (
             <tr key={headerGroup.id}>
               {headerGroup.headers.map(header => !((header.column.columnDef?.meta as {hideInExport?:boolean})?.hideInExport) ? (
-                <DnDColumnHeader header={header} table={table}/>
+                <DnDColumnHeader header={header} table={table} key={header.id}/>
               ) : null)}
             </tr>
           ))}
@@ -209,7 +209,7 @@ export const CustomTable = React.forwardRef<HTMLTableElement,any>((props,ref)=>{
               {row.getIsExpanded() && (
                 <tr>
                   <td colSpan={row.getVisibleCells().length}>
-                    {customRender({ row })}
+                    {/* {customRender(row)} */}
                   </td>
                 </tr>
               )}

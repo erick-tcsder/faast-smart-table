@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Column, Header, RowData, Table, flexRender } from "@tanstack/react-table";
 import { FilterOverlay } from "./Filter";
 import { ColumnMenu } from "./ColumnMenu/ColumnMenu";
@@ -7,9 +8,21 @@ import { reorderColumn } from "../../App";
 export const DnDColumnHeader = <T extends RowData>({
   header,
   table,
+  allowResizeCols,
+  allowColumnFilter,
+  allowReorderCols,
+  allowColumnPinning,
+  allowColumnSorting,
+  allowColumnGrouping
 }: {
   header: Header<T, unknown>;
   table: Table<T>;
+  allowResizeCols?: boolean;
+  allowReorderCols?: boolean;
+  allowColumnFilter?: boolean;
+  allowColumnPinning?: boolean;
+  allowColumnSorting?: boolean;
+  allowColumnGrouping?: boolean;
 }) => {
   const { getState, setColumnOrder } = table
   const { columnOrder } = getState()
@@ -55,26 +68,28 @@ export const DnDColumnHeader = <T extends RowData>({
             <div className="d-flex justify-content-between">
               {flexRender(header.column.columnDef.header, header.getContext())}
               <div className="d-flex align-self-center">
-                {!header.column.columns.length && (
+                {(allowReorderCols || allowColumnGrouping) && !header.column.columns.length && (
                   <div ref={dragRef} className="text-secondary px-1 align-self-center"><i className="fas fa-up-down-left-right"/></div>
                 )}
-                {header.column.getCanFilter() ? (
+                {(allowColumnFilter && header.column.getCanFilter()) ? (
                   <FilterOverlay column={header.column} table={table} />
                 ) : null}
-                <ColumnMenu header={header} />
+                <ColumnMenu header={header as any} allowColumnGrouping={allowColumnGrouping} allowColumnPinning={allowColumnPinning} allowColumnSorting={allowColumnSorting}/>
               </div>
             </div>
-            <div
-              className="position-absolute h-100 bg-secondary"
-              style={{
-                right: 0,
-                top: 0,
-                cursor: "col-resize",
-                width: "2px",
-              }}
-              onMouseDown={header.getResizeHandler()}
-              onTouchStart={header.getResizeHandler()}
-            />
+            {allowResizeCols && (
+              <div
+                className="position-absolute h-100 bg-secondary"
+                style={{
+                  right: 0,
+                  top: 0,
+                  cursor: "col-resize",
+                  width: "2px",
+                }}
+                onMouseDown={header.getResizeHandler()}
+                onTouchStart={header.getResizeHandler()}
+              />
+            )}
           </>
         )}
       </div>

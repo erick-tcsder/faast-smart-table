@@ -48,7 +48,10 @@ export const DnDGroupingContainer = <T extends RowData>({groupedColumns,setGroup
     }),[groupedColumns])
     return (
       <div ref={dropcreate}>
-        <div ref={drop} className="d-flex gap-2 px-3 py-2">
+        <div ref={drop} className="d-flex gap-2 px-5 py-3" style={{
+          borderRadius: '5px',
+          border: '1px dashed #ccc'
+        }}>
           {groupedColumns.map((card) => (
             <Card
               key={card}

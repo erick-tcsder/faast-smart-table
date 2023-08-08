@@ -14,7 +14,7 @@ import {
 } from '@tanstack/match-sorter-utils'
 import IndeterminateCheckbox from './components/shared/InderterminateCheckbox'
 
-export const fuzzyFilter: FilterFn<Person> = (
+export const fuzzyFilter: FilterFn<any> = (
   row,
   columnId,
   value,
@@ -31,7 +31,7 @@ export const fuzzyFilter: FilterFn<Person> = (
   return itemRank.passed
 }
 
-export const fuzzySort: SortingFn<Person> = (rowA, rowB, columnId) => {
+export const fuzzySort: SortingFn<any> = (rowA, rowB, columnId) => {
   let dir = 0
 
   // Only sort by rank if the column has ranking information
@@ -142,17 +142,15 @@ export const columns: ColumnDef<Person>[] = [
       <div className="px-1">
         <button
           {...{
-            onClick: row.getToggleExpandedHandler(),
+            onClick: ()=>{row.toggleExpanded()},
             style: {
               cursor: row.getCanExpand()
                 ? 'pointer'
                 : 'normal',
-              border: 'none',
-              backgroundColor: 'transparent'
             },
-            className: ""
+            className: "btn btn-light"
           }}
-        >asd</button>
+        ><i className={'fas' + (!row.getIsExpanded() ? " fa-arrow-right" : " fa-arrow-down")}/></button>
       </div>
     ),
     meta: {
