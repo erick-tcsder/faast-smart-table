@@ -162,12 +162,12 @@ export const FaastSmartTable = <T extends RowData>(props: Props<T>) => {
             position: ["left","right"].includes(hg) ? 'sticky' : 'static',
             left: hg === 'left' ? 0 : undefined,
             right: hg === 'right' ? 0 : undefined,
-          }}>
+          }} key={hg}>
             <thead>
               {getTableHeaderGroups(table,hg)[0].map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <DnDColumnHeader header={header} table={table} {...restProps}/>
+                    <DnDColumnHeader header={header} table={table} {...restProps} key={header.id}/>
                   ))}
                 </tr>
               ))}
