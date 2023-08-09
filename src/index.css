@@ -65,7 +65,7 @@ tfoot th {
 div{
   :is(table) {
     border-spacing: 0;
-    border: 1px solid black;
+    border: 1px solid rgb(141, 141, 141);
 
     :is(tr) {
       :last-child {
@@ -79,8 +79,8 @@ div{
     :is(td) {
       margin: 0;
       padding: 0.5rem;
-      border-bottom: 1px solid black;
-      border-right: 1px solid black;
+      border-bottom: 1px solid rgb(141, 141, 141);
+      border-right: 1px solid rgb(141, 141, 141);
 
       :last-child {
         border-right: 0;
