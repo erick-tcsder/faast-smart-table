@@ -20,7 +20,7 @@ export const reorderColumn = (
 }
 
 export const App = () => {
-  const [data,setData] = useState(makeData(1000))
+  const [data] = useState(makeData(1000))
   const {
     ...pr
   } = useTable({
