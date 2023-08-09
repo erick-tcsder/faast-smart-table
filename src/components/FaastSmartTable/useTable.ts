@@ -14,7 +14,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { fuzzyFilter } from "../../tableModels";
 import { getLeafCols } from "../../utils/utils";
 
@@ -33,10 +33,13 @@ export const useTable = <T>({ defaultColumns, data, defaultColumnOrder }: TableP
   const [columns] = useState(() => [...defaultColumns]);
   const calculatedDefaultColumnOrder = useMemo(()=>{
     const colsOrd: string[] = []
-    getLeafCols(colsOrd,defaultColumns)
+    defaultColumns.map(c=>getLeafCols(colsOrd,c))
     return colsOrd
-  },[])
+  },[defaultColumns])
   const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(defaultColumnOrder ?? calculatedDefaultColumnOrder);
+  useEffect(()=>{
+    setColumnOrder(calculatedDefaultColumnOrder)
+  },[calculatedDefaultColumnOrder])
 
   const [columnVisibility, setColumnVisibility] = useState({});
   const [grouping, setGrouping] = useState<GroupingState>([]);
