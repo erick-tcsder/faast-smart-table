@@ -237,7 +237,7 @@ export const FaastSmartTable = <T extends RowData>(props: Props<T>) => {
                       );
                     })}
                   </tr>
-                  {allowColumnSubcomponents && row.getIsExpanded() && !row.getIsGrouped() && Boolean(customRender) && (
+                  {allowColumnSubcomponents && row.getIsExpanded() && !row.getIsGrouped() && Boolean(customRender) && hg ==='center' && (
                     <tr>
                       <td colSpan={row.getVisibleCells().length}>
                         {customRender?.(row)}

@@ -13,6 +13,7 @@ import {
   RankingInfo,
 } from '@tanstack/match-sorter-utils'
 import IndeterminateCheckbox from './components/shared/InderterminateCheckbox'
+import dayjs from 'dayjs'
 
 export const fuzzyFilter: FilterFn<any> = (
   row,
@@ -51,6 +52,11 @@ export const strictListFilter : FilterFn<Person> = (row,
   value)=>{
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call
   return (value as string[]).includes(row.getValue(columnId))
+}
+
+export const dateRangeFilter : FilterFn<Person> = (row,columnId,value)=>{
+  const [dateA,dateB] = value as [Date,Date]
+  return dayjs(dateA).isBefore(dayjs(row.getValue(columnId))) && dayjs(dateB).isAfter(dayjs(row.getValue(columnId)))
 }
 
 export type TableMeta = {
@@ -190,6 +196,17 @@ export const columns: ColumnDef<Person>[] = [
         sortingFn: fuzzySort,
       },
     ],
+  },
+  {
+    id: 'birthDate',
+    accessorKey: 'birth',
+    header:"Birth Date",
+    cell: info=>dayjs(info.getValue() as Date).format('DD MMM YYYY'),
+    enableSorting: false,
+    filterFn: dateRangeFilter,
+    meta:{
+      filterType: 'date-range-filter'
+    }
   },
   {
     id: 'info',

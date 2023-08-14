@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Column, RowData, Table } from '@tanstack/react-table'
 import React, { useRef, useState } from 'react'
 import DebouncedInput from './DebouncedInput'
 import { Overlay } from 'react-bootstrap'
 import { useOutsideAlerter } from '../../hooks/useOutsideAlerter'
+import dayjs from 'dayjs'
 
 type NumberInputProps = {
   columnFilterValue: [number, number]
@@ -99,6 +101,34 @@ const TextInput: React.FC<TextInputProps> = ({
   )
 }
 
+type DaterangeInputProps = {
+  columnId: string;
+  columnFilterValue: [Date,Date];
+  setFilterValue: (updater: any)=> void;
+}
+
+const DateRangeInput = (props: DaterangeInputProps)=>{
+  const [dateRange,setDateRange] = useState([dayjs(),dayjs()])
+  return (
+    <div>
+      <div className="d-flex">
+        <DebouncedInput
+          type="date"
+          onChange={(e)=>{console.log('e :>> ', e);}}
+          value={dateRange[0].format("YYYY-MM-DD")}
+          className="form-control form-control-sm"
+        />
+        <DebouncedInput
+          type="date"
+          onChange={(e)=>{console.log('e :>> ', e);}}
+          value={dateRange[1].format("YYYY-MM-DD")}
+          className="form-control form-control-sm"
+        />
+      </div>
+    </div>
+  )
+}
+
 type Props<T extends RowData> = {
   column: Column<T, unknown>
   table: Table<T>
@@ -121,13 +151,18 @@ export function Filter<T extends RowData>({ column, table }: Props<T>) {
     [uniqueValues]
   )
 
-  return typeof firstValue === 'number' ? (
+  if((column.columnDef.meta as any)?.['filterType'] === 'date-range-filter') return (
+    <DateRangeInput columnFilterValue={columnFilterValue as [Date,Date]} columnId={column.id} setFilterValue={column.setFilterValue}/>
+  )
+
+  if(typeof firstValue === 'number') return (
     <NumberInput
       columnFilterValue={columnFilterValue as [number, number]}
       getFacetedMinMaxValues={column.getFacetedMinMaxValues}
       setFilterValue={column.setFilterValue}
     />
-  ) : (
+  )
+  if(typeof firstValue === 'string') return (
     <TextInput
       columnId={column.id}
       columnFilterValue={columnFilterValue as string[]}
@@ -136,6 +171,7 @@ export function Filter<T extends RowData>({ column, table }: Props<T>) {
       sortedUniqueValues={sortedUniqueValues}
     />
   )
+  return null
 }
 
 export function FilterOverlay<T extends RowData>(pprops:Props<T>){

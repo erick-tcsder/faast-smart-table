@@ -27,6 +27,10 @@ export const App = () => {
     defaultColumns: columns,
     data: data
   })
+
+
+  console.log('pr.rowSelection :>> ', pr.rowSelection);
+
   return (
     <>
       <FaastSmartTable table={pr.table}
@@ -44,7 +48,9 @@ export const App = () => {
       grouping={pr.grouping}
       setGrouping={pr.setGrouping}
       globalFilter={pr.globalFilter}
-      setGlobalFilter={pr.setGlobalFilter}/>
+      setGlobalFilter={pr.setGlobalFilter}
+      customRender={(row)=><pre>{JSON.stringify(row,null,2)}</pre>}
+      />
     </>
   )
 }

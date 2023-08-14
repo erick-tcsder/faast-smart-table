@@ -8,6 +8,7 @@ export type Person = {
   progress: number
   status: 'relationship' | 'complicated' | 'single'
   subRows?: Person[]
+  birth: Date
 }
 
 const range = (len: number) => {
@@ -22,6 +23,7 @@ const newPerson = (): Person => {
   return {
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
+    birth: faker.date.anytime(),
     age: faker.number.int(40),
     visits: faker.number.int(1000),
     progress: faker.number.int(100),
