@@ -56,52 +56,11 @@ export const strictListFilter : FilterFn<Person> = (row,
 
 export const dateRangeFilter : FilterFn<Person> = (row,columnId,value)=>{
   const [dateA,dateB] = value as [Date,Date]
-  return dayjs(dateA).isBefore(dayjs(row.getValue(columnId))) && dayjs(dateB).isAfter(dayjs(row.getValue(columnId)))
+  return (!dateA || dayjs(dateA).isBefore(dayjs(row.getValue(columnId)),'day')) && (!dateB || dayjs(dateB).isAfter(dayjs(row.getValue(columnId)),'day'))
 }
 
 export type TableMeta = {
   updateData: (rowIndex: number, columnId: string, value: unknown) => void
-}
-
-const Cll  = ({ getValue, row: { index }, column: { id }, table }:{
-  getValue: ()=>any;
-  row: {
-      index: any;
-  };
-  column: {
-      id: any;
-  };
-  table: any;
-}) => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const initialValue = getValue()
-  // We need to keep and update the state of the cell normally
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const [value, setValue] = React.useState(initialValue)
-
-  // When the input is blurred, we'll call our table meta's updateData function
-  const onBlur = () => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
-    (table.options.meta as TableMeta).updateData(index, id, value)
-  }
-
-  // If the initialValue is changed external, sync it up with our state
-  React.useEffect(() => {
-    setValue(initialValue)
-  }, [initialValue])
-
-  return (
-    <input
-      value={value as string}
-      onChange={e => setValue(e.target.value)}
-      onBlur={onBlur}
-    />
-  )
-}
-
-// Give our default column cell renderer editing superpowers!
-export const defaultColumn: Partial<ColumnDef<Person>> = {
-  cell: Cll,
 }
 
 export const columns: ColumnDef<Person>[] = [
@@ -199,11 +158,11 @@ export const columns: ColumnDef<Person>[] = [
   },
   {
     id: 'birthDate',
-    accessorKey: 'birth',
+    accessorFn: row=> dayjs(row.birth).startOf('day').toDate(),
     header:"Birth Date",
     cell: info=>dayjs(info.getValue() as Date).format('DD MMM YYYY'),
-    enableSorting: false,
     filterFn: dateRangeFilter,
+    sortingFn: 'datetime',
     meta:{
       filterType: 'date-range-filter'
     }

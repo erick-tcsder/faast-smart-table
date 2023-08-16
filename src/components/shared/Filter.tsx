@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Column, RowData, Table } from '@tanstack/react-table'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import DebouncedInput from './DebouncedInput'
 import { Overlay } from 'react-bootstrap'
 import { useOutsideAlerter } from '../../hooks/useOutsideAlerter'
@@ -108,23 +108,29 @@ type DaterangeInputProps = {
 }
 
 const DateRangeInput = (props: DaterangeInputProps)=>{
-  const [dateRange,setDateRange] = useState([dayjs(),dayjs()])
+  const [dateRange,setDateRange] = useState([props.columnFilterValue?.[0] ? dayjs(props.columnFilterValue?.[0]) : undefined, props.columnFilterValue?.[1] ? dayjs(props.columnFilterValue?.[1]) : undefined])
+
+  useEffect(()=>{
+    setDateRange([props.columnFilterValue?.[0] ? dayjs(props.columnFilterValue?.[0]) : undefined,props.columnFilterValue?.[1] ? dayjs(props.columnFilterValue?.[1]) : undefined])
+  },[props.columnFilterValue])
+
   return (
     <div>
       <div className="d-flex">
         <DebouncedInput
           type="date"
-          onChange={(e)=>{console.log('e :>> ', e);}}
-          value={dateRange[0].format("YYYY-MM-DD")}
+          onChange={(e)=>{props.setFilterValue([e ? dayjs(e,'YYYY-MM-DD').toDate() : undefined,dateRange[1]?.toDate()])}}
+          value={dateRange[0]?.format("YYYY-MM-DD") ?? ""}
           className="form-control form-control-sm"
         />
         <DebouncedInput
           type="date"
-          onChange={(e)=>{console.log('e :>> ', e);}}
-          value={dateRange[1].format("YYYY-MM-DD")}
+          onChange={(e)=>{props.setFilterValue([dateRange[0]?.toDate(), e ? dayjs(e,'YYYY-MM-DD').toDate() : undefined])}}
+          value={dateRange[1]?.format("YYYY-MM-DD") ?? ""}
           className="form-control form-control-sm"
         />
       </div>
+      <button className='btn btn-primary btn-wide w-100 mt-2' onClick={()=>props.setFilterValue([undefined,undefined])}>Resetear Filtro</button>
     </div>
   )
 }
