@@ -1,9 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Column, Header, RowData, Table, flexRender } from "@tanstack/react-table";
+import { Column, ColumnOrderState, Header, RowData, Table, flexRender } from "@tanstack/react-table";
 import { FilterOverlay } from "./Filter";
 import { ColumnMenu } from "./ColumnMenu/ColumnMenu";
 import { useDrag, useDrop } from "react-dnd";
-import { reorderColumn } from "../../App";
+
+export const reorderColumn = (
+  draggedColumnId: string,
+  targetColumnId: string,
+  columnOrder: string[]
+): ColumnOrderState => {
+  columnOrder.splice(
+    columnOrder.indexOf(targetColumnId),
+    0,
+    columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0]
+  )
+  return [...columnOrder]
+}
 
 export const DnDColumnHeader = <T extends RowData>({
   header,

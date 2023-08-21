@@ -1,6 +1,3 @@
-import {
-  ColumnOrderState,
-} from '@tanstack/react-table'
 import { FaastSmartTable, useTable } from './components/FaastSmartTable'
 import { columns } from './tableModels'
 import { makeData } from './makeData'
@@ -8,18 +5,6 @@ import { useCallback, useState } from 'react'
 import { TableProfileOrigin, useLocalStorageProfiling } from './components/FaastSmartTable/useLocalStorageProfiling'
 import Swal from 'sweetalert2'
 
-export const reorderColumn = (
-  draggedColumnId: string,
-  targetColumnId: string,
-  columnOrder: string[]
-): ColumnOrderState => {
-  columnOrder.splice(
-    columnOrder.indexOf(targetColumnId),
-    0,
-    columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0]
-  )
-  return [...columnOrder]
-}
 
 export const App = () => {
   const [data] = useState(makeData(1000))
