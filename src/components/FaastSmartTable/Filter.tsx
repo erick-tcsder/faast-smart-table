@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Column, RowData, Table } from '@tanstack/react-table'
 import React, { useEffect, useRef, useState } from 'react'
 import DebouncedInput from './DebouncedInput'
 import { Overlay } from 'react-bootstrap'
-import { useOutsideAlerter } from '../../hooks/useOutsideAlerter'
+import { useOutsideAlerter } from './useOutsideAlerter'
 import dayjs from 'dayjs'
 
 type NumberInputProps = {
@@ -49,6 +52,7 @@ const NumberInput: React.FC<NumberInputProps> = ({
           className="form-control form-control-sm"
         />
       </div>
+      <button className='btn btn-primary btn-wide btn-sm w-100 mt-2' onClick={()=>{setFilterValue(undefined)}}>Reset</button>
     </div>
   )
 }
@@ -189,7 +193,7 @@ export function FilterOverlay<T extends RowData>(pprops:Props<T>){
   })
   return (
     <>
-      <button ref={target} onClick={() => setShow(true)} className="btn btn-secondary btn-sm me-1"><i className='fas fa-filter'/></button>
+      <button ref={target} onClick={() => setShow(true)} className={"btn btn-sm me-1" + (pprops.column.getFilterValue() ? " btn-primary" : " btn-secondary")}><i className='fas fa-filter'/></button>
       <Overlay target={target.current} show={show} placement="bottom-start">
       {({
           placement: _placement,

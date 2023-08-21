@@ -10,14 +10,15 @@ import {
   RowData,
   Table,
 } from "@tanstack/react-table";
-import { DnDColumnHeader } from "../shared/DnDColumnHeader";
-import { DnDGroupingContainer } from "../shared/DnDGroupingContainer";
+import { DnDColumnHeader } from "./DnDColumnHeader";
+import { DnDGroupingContainer } from "./DnDGroupingContainer";
 import { Dropdown, Modal } from "react-bootstrap";
 import { useDownloadExcel } from "react-export-table-to-excel";
-import DebouncedInput from "../shared/DebouncedInput";
-import ActionButtons from "../shared/ActionButtons";
+import DebouncedInput from "./DebouncedInput";
+import ActionButtons from "./ActionButtons";
 import dayjs from "dayjs";
-
+import { TableProfile } from "./useTable";
+import { TableProfileExtended } from "./useLocalStorageProfiling";
 type TableGroup = string;
 
 function getTableHeaderGroups<T extends RowData>(
@@ -46,7 +47,7 @@ function getRowGroup<T extends RowData>(row: Row<T>, tg?: TableGroup) {
   return row.getVisibleCells();
 }
 
-interface Props<T extends RowData> {
+interface Props<T> {
   table: Table<T>;
   exportedFileName?: string; 
   title: string | React.ReactElement
@@ -55,16 +56,27 @@ interface Props<T extends RowData> {
   setGrouping: (v: GroupingState) => void;
   globalFilter: string;
   setGlobalFilter: (value:string)=>void
-  allowNativeExcelDownload: boolean;
-  allowColumnSubcomponents: boolean;
-  allowGlobalFilter: boolean;
-  allowResizeCols: boolean;
-  allowReorderCols: boolean;
-  allowColumnFilter: boolean;
-  allowColumnPinning: boolean;
-  allowColumnSorting: boolean;
-  allowColumnGrouping: boolean;
-  allowHandleVisibility: boolean;
+  exportProfile?:() => {
+    profile: TableProfile;
+    id?: string | undefined;
+  },
+  handleChangeCurrentProfile?:(id: string) => void | Promise<void>,
+  handleDeleteProfile?:() => Promise<void>,
+  handleSaveProfile?:(isNew: boolean) => Promise<void>,
+  profiles: TableProfileExtended[]
+  currentProfile?: string;
+  allowNativeExcelDownload?: boolean;
+  allowColumnSubcomponents?: boolean;
+  allowGlobalFilter?: boolean;
+  allowResizeCols?: boolean;
+  allowReorderCols?: boolean;
+  allowColumnFilter?: boolean;
+  allowColumnPinning?: boolean;
+  allowColumnSorting?: boolean;
+  allowColumnGrouping?: boolean;
+  allowHandleVisibility?: boolean;
+  allowProfiling?: boolean;
+  tableActions?: React.ReactElement
 }
 
 export const FaastSmartTable = <T extends RowData>(props: Props<T>) => {
@@ -80,11 +92,19 @@ export const FaastSmartTable = <T extends RowData>(props: Props<T>) => {
       allowColumnSubcomponents,
       allowNativeExcelDownload,
       allowGlobalFilter,
+      handleChangeCurrentProfile,
+      handleDeleteProfile,
+      handleSaveProfile,
+      profiles,
+      currentProfile,
+      allowProfiling,
+      tableActions,
       ...restProps
     } = props;
     const refDownload = useRef<HTMLTableElement|null>(null)
     const [isGrouping, setIsGrouping] = useState(Boolean(table.getState()?.grouping?.length))
     const [showVisibility, setShowVisibility] = useState(false)
+    const [showProfileSelection, setShowProfileSelection] = useState(false)
     const {
       onDownload
     } = useDownloadExcel({
@@ -97,9 +117,14 @@ export const FaastSmartTable = <T extends RowData>(props: Props<T>) => {
     return (
       <div className="w-100">
       <div className="d-flex justify-content-between px-2">
-        <span className="h3 align-self-center mb-0">
-          {title}
-        </span>
+        <div className="d-flex flex-column">
+          <span className="h3 align-self-center mb-0">
+            {title}
+          </span>
+          <span className="fs-6 text-secondary text-uppercase">
+            {currentProfile ?? ''}
+          </span>
+        </div>
         <div className="d-flex">
           {allowGlobalFilter && (
             <div className="p-2">
@@ -119,7 +144,29 @@ export const FaastSmartTable = <T extends RowData>(props: Props<T>) => {
                 className="btn align-self-center my-auto h-100 py-2"
               >Descargar</Dropdown.Toggle>
               <Dropdown.Menu>
-                <button role="button" onClick={()=>onDownload()} className='dropdown-item' style={{cursor: 'pointer'}}> Export excel </button>
+                <button role="button" onClick={()=>onDownload()} className='dropdown-item' style={{cursor: 'pointer'}}> Exportar Excel </button>
+              </Dropdown.Menu>
+            </Dropdown>
+          )}
+
+          {allowProfiling && (
+            <Dropdown className="align-self-center">
+              <Dropdown.Toggle
+                variant="secondary"
+                id="dropdown-basic"
+                className="btn align-self-center my-auto h-100 py-2 ms-2 "
+              >Perfiles</Dropdown.Toggle>
+              <Dropdown.Menu>
+                {currentProfile ? (
+                  <button role="button" onClick={()=>{handleSaveProfile?.(false).catch(e=>console.error(e))}} className='dropdown-item' style={{cursor: 'pointer'}}> Guardar Perfil Actual </button>
+                ) : null}
+                <button role="button" onClick={()=>{handleSaveProfile?.(true).catch(e=>console.error(e))}} className='dropdown-item' style={{cursor: 'pointer'}}> Nuevo Perfil </button>
+                {(profiles && profiles.length) ? (
+                  <button role="button" onClick={()=>setShowProfileSelection(true)} className='dropdown-item' style={{cursor: 'pointer'}}> Seleccionar Perfil </button>
+                ) : null}
+                {currentProfile ? (
+                  <button role="button" onClick={()=>{handleDeleteProfile?.().catch(e=>console.error(e))}} className='dropdown-item text-danger' style={{cursor: 'pointer'}}> Eliminar Perfil </button>
+                ) : null}
               </Dropdown.Menu>
             </Dropdown>
           )}
@@ -145,6 +192,7 @@ export const FaastSmartTable = <T extends RowData>(props: Props<T>) => {
               <Dropdown.Item onClick={()=>{setShowVisibility(true)}}>Visibilidad de Columnas</Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
+          {tableActions ?? null}
         </div>
       </div>
       {restProps.allowColumnGrouping && isGrouping && (<div>
@@ -297,6 +345,18 @@ export const FaastSmartTable = <T extends RowData>(props: Props<T>) => {
           </div>
           <div className="d-flex gap-2">
             <button onClick={()=>{setShowVisibility(false)}} className="btn btn-primary w-100">Aceptar</button>
+          </div>
+        </Modal.Body>
+      </Modal>
+      <Modal show={showProfileSelection} onHide={()=>setShowProfileSelection(false)} onBackdropClick={()=>setShowProfileSelection(false)} size="sm" centered>
+        <Modal.Body title="Perfiles">
+          <div className="w-100 d-flex flex-column gap-2 mb-3">
+            {profiles?.map(p=>(
+              <button className={"menu-item py-2" + ((p.id === currentProfile) ? " bg-secondary text-white" : '')} style={{border:'none'}} onClick={()=>{handleChangeCurrentProfile?.(p.id)?.catch(e=>console.error(e))}}>{p.id}</button>
+            ))}
+          </div>
+          <div className="d-flex gap-2">
+            <button onClick={()=>{setShowProfileSelection(false)}} className="btn btn-primary w-100">Aceptar</button>
           </div>
         </Modal.Body>
       </Modal>

@@ -23,7 +23,8 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
-    "react-export-table-to-excel": "^1.0.6"
+    "react-export-table-to-excel": "^1.0.6",
+    "sweetalert2": "^11.7.23"
   },
   "devDependencies": {
     "@faker-js/faker": "^8.0.2",

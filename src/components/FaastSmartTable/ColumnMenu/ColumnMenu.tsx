@@ -21,15 +21,15 @@ export function ColumnMenu<T extends RowData>(props: React.PropsWithChildren<{he
           <PingItem pinged={props.header.column.getIsPinned()} handleChangePinged={props.header.column.pin}/>
         )}
         {props.allowColumnSorting && props.header.column.getCanSort() && (
-          <li onClick={props.header.column.getToggleSortingHandler()} className="dropdown-item">Ordenar ({{
+          <div onClick={props.header.column.getToggleSortingHandler()} className="dropdown-item">Ordenar ({{
             asc: '🔼',
             desc: '🔽',
-          }[props.header.column.getIsSorted() as string] ?? '📶'})</li>
+          }[props.header.column.getIsSorted() as string] ?? '📶'})</div>
         )}
         {props.allowColumnGrouping && props.header.column.getCanGroup() && (
-          <li onClick={props.header.column.getToggleGroupingHandler()} className="dropdown-item">{props.header.column.getIsGrouped()
+          <div onClick={props.header.column.getToggleGroupingHandler()} className="dropdown-item">{props.header.column.getIsGrouped()
             ? `Desagrupar(${props.header.column.getGroupedIndex()})`
-            : `Agrupar`}</li>
+            : `Agrupar`}</div>
         )}
       </Dropdown.Menu>
     </Dropdown>

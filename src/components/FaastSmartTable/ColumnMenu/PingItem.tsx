@@ -1,7 +1,7 @@
 import classNames from "classnames";
 import { useRef, useState } from "react";
 import { Overlay } from "react-bootstrap";
-import { useOutsideAlerter } from "../../../hooks/useOutsideAlerter";
+import { useOutsideAlerter } from "../useOutsideAlerter";
 
 export const PingItem = (itemProps:{
     pinged?: 'left'|'right'|false;
