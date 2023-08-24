@@ -19,8 +19,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { fuzzyFilter } from "../../tableModels";
 import { getLeafCols } from "./utils/utils";
+import { fuzzyFilter } from "./utils/modelUtils";
 
 export type TableProfile = {
   columnOrder?: ColumnOrderState

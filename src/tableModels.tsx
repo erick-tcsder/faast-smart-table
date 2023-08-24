@@ -2,10 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
   ColumnDef,
-  FilterFn,
-  SortingFn,
   TableMeta,
-  sortingFns,
 } from '@tanstack/react-table'
 import React from 'react'
 import { Person } from './makeData'
@@ -111,7 +108,7 @@ export const columns: ColumnDef<Person>[] = [
     accessorFn: row=> dayjs(row.birth).startOf('day').toDate(),
     header:"Birth Date",
     cell: info=>dayjs(info.getValue() as Date).format('DD MMM YYYY'),
-    filterFn: dateRangeFilter,
+    filterFn: dateRangeFilter as any,
     sortingFn: 'datetime',
     meta:{
       filterType: 'date-range-filter'
@@ -140,7 +137,7 @@ export const columns: ColumnDef<Person>[] = [
             id: 'status',
             accessorKey: 'status',
             header: 'Status',
-            filterFn: strictListFilter
+            filterFn: strictListFilter as any
           },
           {
             id: 'progress',
