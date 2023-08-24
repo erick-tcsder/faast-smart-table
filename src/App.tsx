@@ -24,17 +24,7 @@ export const App = () => {
   } = useTable({
     defaultColumns: columns,
     data: data,
-    defaultProfile:{
-      globalFilter: 'ana',
-      columnFilters:[{
-        id: 'age',
-        value: [20,30]
-      }],
-      columnSizing: {
-        age: 200
-      }
-    },
-    currentProfile,
+    currentProfile,git
     profiles
   })
 
