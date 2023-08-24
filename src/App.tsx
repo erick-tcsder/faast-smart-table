@@ -24,7 +24,7 @@ export const App = () => {
   } = useTable({
     defaultColumns: columns,
     data: data,
-    currentProfile,git
+    currentProfile,
     profiles
   })
 
